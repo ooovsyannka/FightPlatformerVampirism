@@ -5,7 +5,6 @@ public class PlayerDetector : MonoBehaviour
 {
     [SerializeField] private PlayerHealth _health;
     [SerializeField] private Ammunition _amunition;
-    [SerializeField] private Vampirism _vampirism;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -26,19 +25,6 @@ public class PlayerDetector : MonoBehaviour
                 _amunition.ReplenishmentBulletsCount(ammunitionLoot.CountToRecovery);
                 ammunitionLoot.gameObject.SetActive(false);
             }
-        }
-
-        if (collision.TryGetComponent(out EnemyHealth enemyHealth))
-        {
-            _vampirism.AddEnemyInList(enemyHealth);
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.TryGetComponent(out EnemyHealth enemyHealth))
-        {
-            _vampirism.RemoveEnemyFromList(enemyHealth);
         }
     }
 }

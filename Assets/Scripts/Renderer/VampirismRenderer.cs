@@ -20,6 +20,7 @@ public class VampirismRenderer : MonoBehaviour
         _colorZone = Color.red;
         _colorZone.a = 0;
         _zone.color = _colorZone;
+        _bar.maxValue=  _vampirism.SkillDuration;
     }
 
     private void OnEnable()

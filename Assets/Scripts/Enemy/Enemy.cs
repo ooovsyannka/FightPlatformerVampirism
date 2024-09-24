@@ -101,7 +101,7 @@ public class Enemy : MonoBehaviour
 
         yield return new WaitForSeconds(_timeDieDelay);
 
-        _pool.ReturnEnemyInPool(this);
+        //_pool.ReturnEnemyInPool(this);
         DropLoot();
 
         gameObject.SetActive(false);

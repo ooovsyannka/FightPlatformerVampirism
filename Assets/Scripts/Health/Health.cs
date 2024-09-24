@@ -5,7 +5,7 @@ public abstract class Health : MonoBehaviour
 {
     [field:SerializeField] public int MaxValue { get; private set; }
     
-    protected float CurrentValue { get; private set; }
+    public float CurrentValue { get; private set; }
 
     public event Action Died;
     public event Action<float> ValueChanged;

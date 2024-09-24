@@ -172,5 +172,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _force: 25
-  _critDamage: 4
-  <Damage>k__BackingField: 2
+  _critDamage: 2
+  <Damage>k__BackingField: 1

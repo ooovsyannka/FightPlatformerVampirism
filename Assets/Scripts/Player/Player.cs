@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Vampirism _vampirism;
     [SerializeField] private float _respawnDelay;
 
+    private int _startHealth = 1; 
     private bool _isDie = false;
     private bool _isMove = false;
 
@@ -36,7 +37,7 @@ public class Player : MonoBehaviour
     {
         _state = State.AnyState;
         _health.Died += Die;
-        _health.Regenerate(_health.MaxValue);
+        _health.Regenerate(_startHealth);
     }
 
     private void Update()
@@ -109,8 +110,6 @@ public class Player : MonoBehaviour
 
     private IEnumerator RespawnDelay()
     {
-
-
         yield return new WaitForSeconds(_respawnDelay);
 
         _health.Regenerate(_health.MaxValue);

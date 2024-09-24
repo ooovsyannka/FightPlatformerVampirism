@@ -1,16 +1,16 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CircleCollider2D))]
+//[RequireComponent(typeof(VampirismDetector))]
 
 public class Vampirism : MonoBehaviour
 {
     [SerializeField] private Health _health;
     [SerializeField] private float _stealHealthCount;
 
-    private List<EnemyHealth> _enemyHealths = new List<EnemyHealth>();
+    [SerializeField] private VampirismDetector _detector;
+    private EnemyHealth _enemyHealth;
     private Coroutine _stealHealthCoroutine;
     private Coroutine _coolDownSkillCoroutine;
     private bool _canUse;
@@ -21,27 +21,16 @@ public class Vampirism : MonoBehaviour
     public event Action SkillUsed;
     public event Action SkillRestored;
 
-    private void Start()
+    private void Awake()
     {
         _canUse = true;
-    }
-
-    public void AddEnemyInList(EnemyHealth enemyHealth)
-    {
-        _enemyHealths.Add(enemyHealth);
-    }
-
-    public void RemoveEnemyFromList(EnemyHealth enemyHealth)
-    {
-        _enemyHealths.Remove(enemyHealth);
+        _detector.gameObject.SetActive(false);
     }
 
     public void UseSkill()
     {
         if (_canUse == false)
             return;
-
-
 
         if (_stealHealthCoroutine != null)
             StopCoroutine(_stealHealthCoroutine);
@@ -60,8 +49,14 @@ public class Vampirism : MonoBehaviour
         _coolDownSkillCoroutine = StartCoroutine(CooldownSkill());
     }
 
+    public void GetEnemyHealth(EnemyHealth enemyHealth)
+    {
+        _enemyHealth = enemyHealth;
+    }
+
     private IEnumerator StealHealth()
     {
+        _detector.gameObject.SetActive(true);
         _canUse = false;
 
         SkillUsed?.Invoke();
@@ -73,12 +68,17 @@ public class Vampirism : MonoBehaviour
         {
             timer -= Time.deltaTime;
 
-            if (_enemyHealths.Count > 0)
+            if (_enemyHealth != null)
             {
-                for (int i = 0; i < _enemyHealths.Count; i++)
+                _enemyHealth.TakeDamage(adaptiveStealHealthCount);
+
+                if (_enemyHealth.CurrentValue > adaptiveStealHealthCount)
                 {
-                    _enemyHealths[i].TakeDamage(adaptiveStealHealthCount);
                     _health.Regenerate(adaptiveStealHealthCount);
+                }
+                else
+                {
+                    _health.Regenerate(_enemyHealth.CurrentValue);
                 }
             }
 
@@ -93,6 +93,7 @@ public class Vampirism : MonoBehaviour
 
     private IEnumerator CooldownSkill()
     {
+        _detector.gameObject.SetActive(false);
         SkillRestored?.Invoke();
 
         yield return new WaitForSeconds(CoolDownTimer);
