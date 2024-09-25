@@ -2,18 +2,18 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-//[RequireComponent(typeof(VampirismDetector))]
-
 public class Vampirism : MonoBehaviour
 {
     [SerializeField] private Health _health;
     [SerializeField] private float _stealHealthCount;
-
     [SerializeField] private VampirismDetector _detector;
+
     private EnemyHealth _enemyHealth;
     private Coroutine _stealHealthCoroutine;
     private Coroutine _coolDownSkillCoroutine;
+    private float _skillDelay = 0.5f;
     private bool _canUse;
+    private WaitForSeconds _waitForSeconds;
 
     [field: SerializeField] public float SkillDuration { get; private set; }
     [field: SerializeField] public float CoolDownTimer { get; private set; }
@@ -56,33 +56,38 @@ public class Vampirism : MonoBehaviour
 
     private IEnumerator StealHealth()
     {
+        _waitForSeconds = new WaitForSeconds(_skillDelay);
         _detector.gameObject.SetActive(true);
         _canUse = false;
 
         SkillUsed?.Invoke();
 
-        float adaptiveStealHealthCount = _stealHealthCount * Time.deltaTime;
         float timer = SkillDuration;
+
+        float currenttealHealthCount;
 
         while (timer > 0)
         {
-            timer -= Time.deltaTime;
+            timer -= _skillDelay;
+
+            _enemyHealth = _detector.GetNearestEnemy();
 
             if (_enemyHealth != null)
             {
-                _enemyHealth.TakeDamage(adaptiveStealHealthCount);
-
-                if (_enemyHealth.CurrentValue > adaptiveStealHealthCount)
+                if (_enemyHealth.CurrentValue > _stealHealthCount)
                 {
-                    _health.Regenerate(adaptiveStealHealthCount);
+                    currenttealHealthCount = _stealHealthCount;
                 }
                 else
                 {
-                    _health.Regenerate(_enemyHealth.CurrentValue);
+                    currenttealHealthCount = _enemyHealth.CurrentValue;
                 }
+
+                _enemyHealth.TakeDamage(currenttealHealthCount);
+                _health.Regenerate(currenttealHealthCount);
             }
 
-            yield return null;
+            yield return _waitForSeconds;
         }
 
         if (_coolDownSkillCoroutine != null)
@@ -93,10 +98,11 @@ public class Vampirism : MonoBehaviour
 
     private IEnumerator CooldownSkill()
     {
+        _waitForSeconds = new WaitForSeconds(CoolDownTimer);
         _detector.gameObject.SetActive(false);
         SkillRestored?.Invoke();
 
-        yield return new WaitForSeconds(CoolDownTimer);
+        yield return _waitForSeconds;
 
         _canUse = true;
     }
